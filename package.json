@@ -1,0 +1,31 @@
+{
+  "name": "sxp-to-json",
+  "version": "0.0.1",
+  "description": "Touchstone file to javascript object conversion library",
+  "main": "main.js",
+  "scripts": {
+    "test": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dvcorreia/sXp-to-json.git"
+  },
+  "keywords": [
+    "touchstone",
+    "touchstone-file",
+    "s2p",
+    "s4p",
+    "smith",
+    "chart",
+    "sxp",
+    "snp",
+    "javascript",
+    "nodejs"
+  ],
+  "author": "Diogo Correia (@dvcorreia)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dvcorreia/sXp-to-json/issues"
+  },
+  "homepage": "https://github.com/dvcorreia/sXp-to-json#readme"
+}
