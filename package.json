@@ -22,7 +22,7 @@
     "javascript",
     "nodejs"
   ],
-  "author": "Diogo Correia (@dvcorreia)",
+  "author": "Diogo Correia (@dvcorreia), João Santos (@joaompsantos)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/dvcorreia/sXp-to-json/issues"
