@@ -27,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/dvcorreia/sXp-to-json/issues"
   },
-  "homepage": "https://github.com/dvcorreia/sXp-to-json#readme"
+  "homepage": "https://github.com/dvcorreia/sXp-to-json#readme",
+  "dependencies": {
+    "mathjs": "^4.0.1"
+  }
 }

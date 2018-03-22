@@ -1,114 +1,162 @@
-const fs = require('fs');
-
-
-var fscale = ['HZ', 'KHZ', 'MHZ', 'GHZ', 'THZ'];
-
-console.log(readFile('/sXpfiles/exp2.s2p'));
+var fs = require('fs');
+var math = require('mathjs');
 
 
 
-function readFile(path) {
-	let data = new Object();
+module.exports = class s2p {
 
-	var file = fs.readFileSync(__dirname + path, 'utf8')
-		.split('\n')
-		.filter((x) => {
-			return x.charAt(0) != '!'
+	constructor(path) {
+		// Read File 
+		let file = fs.readFileSync(__dirname + path, 'utf8')
+			.split('\n')
+			.filter((x) => {
+				return x.charAt(0) != '!'
+			});
+
+		//
+		let fscale = ['HZ', 'KHZ', 'MHZ', 'GHZ', 'THZ'];
+
+		// Set Units
+		let l = file[0].replace(/\s/g, ' ').split(' ').filter(Boolean);
+		this.fscale = fscale.indexOf(l[1].toUpperCase()) * 3;
+		//this.params = l[2];	
+		this.format = l[3].toUpperCase();
+		this.load = l[5];
+		this.params = 0; // Use params to tell if there are 4 orjust 2 available
+		this.freq = new Array();
+		this.p11 = new Array();
+		this.p21 = new Array();
+		this.p12 = new Array();
+		this.p22 = new Array();
+
+		// Read Measurements                   
+
+		// First line holds # units
+		file.splice(0, 1);
+		// Last line is empty
+		file.splice(file.length - 1, 1);
+
+		// Insert points on data and parse scientific notation
+		file = file.forEach((x) => {
+			x = x.replace(/\s/g, ' ').split(' ').filter(Boolean)
+			x.forEach((e, i) => {
+				e = e.toUpperCase().split('E').filter(Boolean);
+				if (e.length >= 2)
+					x[i] = parseFloat(e[0]) * Math.pow(10, parseFloat(e[1]));
+				else
+					x[i] = parseFloat(e[0]);
+			});
+
+			this.freq.push(x[0]);
+
+			//Handle dB/Ang
+			if (this._format == 'DB') {
+				x.forEach((e, i) => {
+					if ((i % 2) == 0) {
+						x[i] = Math.pow(10, e / 20) * Math.cos(x[i + 1]);
+						x[i + 1] = Math.pow(10, e / 20) * Math.sin(x[i + 1]);
+					}
+				});
+
+			} else if (this._format == 'MA') {
+				x.forEach((e, i) => {
+					if ((i % 2) == 0) {
+						x[i] = e * Math.cos(x[i + 1]);
+						x[i + 1] = e * Math.sin(x[i + 1]);
+					}
+				});
+			}
+			// Save Only R + jB
+			this.p11.push({ "x": x[1], "y": x[2] });
+			this.p21.push({ "x": x[3], "y": x[4] });
+			this.p12.push({ "x": x[5], "y": x[6] });
+			this.p22.push({ "x": x[7], "y": x[8] });
 		});
 
-
-
-	getsettings(data, file)
-	getpoints(data, file)
-
-	return data;
-}
-
-
-function getsettings(data, file) {
-	let l = file[0].split(' ').filter(Boolean)
-	data.fscale = getfscale(l)
-	data.params = getparams(l)
-	data.format = getformat(l)
-	data.load = getload(l)
-}
-
-function getpoints(data, file) {
-	let aux = {
-		freq: [],
-		p11: {
-			x: [],
-			y: []
-		},
-		p12: {
-			x: [],
-			y: []
-		},
-		p21: {
-			x: [],
-			y: []
-		},
-		p22: {
-			x: [],
-			y: []
+		if (this.findEmpty()) {
+			this.params = 4;
+		} else {
+			delete this.p12;
+			delete this.p22;
 		}
 	}
 
-	// First line holds # units
-	file.splice(0, 1);
+	// Calculate Return Loss for Sxx
+	returnloss(p) {
+		let aux = []
+		p.forEach((point) => {
+			let a = math.abs(math.complex(point.x, point.y));
+			aux.push(20 * Math.log10(math.abs(a)));
+		});
+		return aux;
+	}
 
-	// Insert points on data and parse scientific notation
-	file = file.forEach((x) => {
+	// Handles Return Loss Request
+	ReturnLoss(p) {
+		let aux = [];
+		switch (p) {
+			case 11:
+				aux = this.returnloss(this.p11);
+				break;
 
-		x = x.replace(/\s/g, ' ').split(' ').filter(Boolean)
-		x.forEach((e,i) => {
+			case 22:
+				aux = this.returnloss(this.p22);
+				break;
 
-      e=e.toUpperCase().split('E').filter(Boolean)
-      if(e.length>=2)
-        x[i] = parseFloat(e[0])*Math.pow(10,parseFloat(e[1]))
-      else
-        x[i] = parseFloat(e[0])
+			default:
+				aux = [];
+				console.log('Stupid Attempt');
 
+		}
 
+		return aux;
+	}
 
-		})
+	// Calculate VSWR For given Sxx
+	vswr(p) {
+		let aux = []
+		p.forEach((point) => {
+			let a = math.abs(math.complex(point.x, point.y));
+			aux.push((1 + math.abs(a)) / (1 - math.abs(a)));
+		});
+		return aux;
+	}
 
+	// Handles VSWR request
+	VSWR(p) {
+		let aux = [];
+		switch (p) {
+			case 11:
+				aux = this.vswr(this.p11);
+				break;
 
-		aux.freq.push(x[0])
+			case 21:
+				aux = this.vswr(this.p22);
+				break;
 
-		aux.p11.x.push(x[1])
-		aux.p11.y.push(x[2])
+			default:
+				aux = [];
+				console.log('Stupid Attempt');
 
-		aux.p12.x.push(x[3])
-		aux.p12.y.push(x[4])
+		}
 
-		aux.p21.x.push(x[5])
-		aux.p21.y.push(x[6])
+		return aux;
+	}
 
-		aux.p22.x.push(x[7])
-		aux.p22.y.push(x[8])
-	})
+	// Find if S12 and S22 are present
+	findEmpty() {
+		let a = 0;
+		this.p12.forEach((point) => {
+			a += point.x + point.y;
+		});
+		/* Only need to check if one is present
+		// Beacuse they come together
+		let b = 0;
+		this.p22.forEach((point) => {
+			b += math.abs(math.complex(point.x, point.y));
+		});
+		*/
+		return a > 0;
+	}
 
-	data.data = aux
-}
-
-
-function getfscale(l) {
-
-	return fscale = fscale.indexOf(l[1].toUpperCase()) * 3;
-}
-
-function getparams(l) {
-
-	return l[2];
-}
-
-function getformat(l) {
-
-	return l[3];
-}
-
-function getload(l) {
-
-	return parseInt(l[5]);
 }
