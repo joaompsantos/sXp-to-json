@@ -73,7 +73,7 @@ module.exports = class s2p {
 			this.p22.push({ "x": x[7], "y": x[8] });
 		});
 
-		if (this.findEmpty()) {
+		if (privMeths.findEmpty.call(this)) {
 			this.params = 4;
 		} else {
 			delete this.p12;
@@ -81,26 +81,16 @@ module.exports = class s2p {
 		}
 	}
 
-	// Calculate Return Loss for Sxx
-	returnloss(p) {
-		let aux = []
-		p.forEach((point) => {
-			let a = math.abs(math.complex(point.x, point.y));
-			aux.push(20 * Math.log10(math.abs(a)));
-		});
-		return aux;
-	}
-
 	// Handles Return Loss Request
 	ReturnLoss(p) {
 		let aux = [];
 		switch (p) {
 			case 11:
-				aux = this.returnloss(this.p11);
+				aux = privMehts.returnloss.call(this.p11);
 				break;
 
-			case 22:
-				aux = this.returnloss(this.p22);
+			case 21:
+				aux = privMehts.returnloss.call(this.p22);
 				break;
 
 			default:
@@ -109,16 +99,6 @@ module.exports = class s2p {
 
 		}
 
-		return aux;
-	}
-
-	// Calculate VSWR For given Sxx
-	vswr(p) {
-		let aux = []
-		p.forEach((point) => {
-			let a = math.abs(math.complex(point.x, point.y));
-			aux.push((1 + math.abs(a)) / (1 - math.abs(a)));
-		});
 		return aux;
 	}
 
@@ -127,11 +107,11 @@ module.exports = class s2p {
 		let aux = [];
 		switch (p) {
 			case 11:
-				aux = this.vswr(this.p11);
+				aux = privMeths.vswr.call(this.p11);
 				break;
 
 			case 21:
-				aux = this.vswr(this.p22);
+				aux = privMeths.vswr.call(this.p22);
 				break;
 
 			default:
@@ -142,6 +122,20 @@ module.exports = class s2p {
 
 		return aux;
 	}
+
+	save(path) {
+		fs.writeFileSync('./results/' + path, JSON.stringify(this), 'utf8', (err) => {
+			if (err) {
+				console.error(err);
+				return;
+			};
+			console.log("File has been created");
+		});
+
+	}
+}
+
+const privMeths = {
 
 	// Find if S12 and S22 are present
 	findEmpty() {
@@ -157,6 +151,28 @@ module.exports = class s2p {
 		});
 		*/
 		return a > 0;
+	},
+
+
+	// Calculate Return Loss for Sxx
+	returnloss(p) {
+		let aux = []
+		p.forEach((point) => {
+			let a = math.abs(math.complex(point.x, point.y));
+			aux.push(20 * Math.log10(math.abs(a)));
+		});
+		return aux;
+	},
+
+
+	// Calculate VSWR For given Sxx
+	vswr(p) {
+		let aux = []
+		p.forEach((point) => {
+			let a = math.abs(math.complex(point.x, point.y));
+			aux.push((1 + math.abs(a)) / (1 - math.abs(a)));
+		});
+		return aux;
 	}
 
 }
