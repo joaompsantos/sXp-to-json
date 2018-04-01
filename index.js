@@ -2,7 +2,6 @@ var fs = require('fs');
 var math = require('mathjs');
 
 
-
 module.exports = class s2p {
 
 	constructor(path) {
@@ -13,7 +12,7 @@ module.exports = class s2p {
 				return x.charAt(0) != '!'
 			});
 
-		//
+		// Frequency scale units
 		let fscale = ['HZ', 'KHZ', 'MHZ', 'GHZ', 'THZ'];
 
 		// Set Units
@@ -90,7 +89,7 @@ module.exports = class s2p {
 				break;
 
 			case 21:
-				aux = privMehts.returnloss.call(this.p22);
+				aux = privMehts.returnloss.call(this.p21);
 				break;
 
 			default:
@@ -111,7 +110,28 @@ module.exports = class s2p {
 				break;
 
 			case 21:
-				aux = privMeths.vswr.call(this.p22);
+				aux = privMeths.vswr.call(this.p21);
+				break;
+
+			default:
+				aux = [];
+				console.log('Stupid Attempt');
+
+		}
+
+		return aux;
+	}
+
+	// Handles Absolute Value request
+	ABS(p) {
+		let aux = [];
+		switch (p) {
+			case 11:
+				aux = privMeths.abs.call(this.p11);
+				break;
+
+			case 21:
+				aux = privMeths.abs.call(this.p21);
 				break;
 
 			default:
@@ -131,7 +151,6 @@ module.exports = class s2p {
 			};
 			console.log("File has been created");
 		});
-
 	}
 }
 
@@ -171,6 +190,16 @@ const privMeths = {
 		p.forEach((point) => {
 			let a = math.abs(math.complex(point.x, point.y));
 			aux.push((1 + math.abs(a)) / (1 - math.abs(a)));
+		});
+		return aux;
+	},
+
+	// Calculate |Sxx|
+	abs(p) {
+		let aux = []
+		p.forEach((point) => {
+			let a = math.abs(math.complex(point.x, point.y));
+			aux.push(a);
 		});
 		return aux;
 	}
