@@ -4,7 +4,100 @@ var math = require('mathjs');
 
 module.exports = class s2p {
 
-	constructor(path) {
+	constructor(p) {
+		privMeths.new.call(this, p);
+	}
+
+	// Hadnles 	
+	Measure(p) {
+		switch (p) {
+			case 11:
+				aux = this.p11;
+				break;
+			case 21:
+				aux = this.p21;
+				break;
+
+			default:
+				aux = [];
+				break;
+		}
+		return aux;
+	}
+
+	// Handles Return Loss Request
+	ReturnLoss() {
+		return privMeths.returnloss.call(this, this.p11);;
+	}
+
+	// Handles VSWR request
+	VSWR() {
+		return privMeths.vswr.call(this, this.p11);
+	}
+
+	// Handles Absolute Value request
+	ABS(p) {
+		let aux = [];
+		switch (p) {
+			case 11:
+				aux = privMeths.abs.call(this, this.p11);
+				break;
+
+			case 21:
+				aux = privMeths.abs.call(this, this.p21);
+				break;
+
+			default:
+				aux = [];
+				console.log('Stupid Attempt');
+
+		}
+
+		return aux;
+	}
+
+	// Returns Wanted Parameter for Given Frequency(Hz)
+	searchFreq(a, b) {
+		let idx = privMeths.closestFreq.call(this, a);
+
+		switch (b) {
+			// S11
+			case 11:
+				return this.p11[idx];
+				break;
+			// S21
+			case 21:
+				return this.p21(idx);
+				break;
+
+			// Freq	
+			case 'RL':
+				return privMeths.returnloss.call(this, this.p11)[idx];
+				break;
+
+			case 'VSWR':
+				return this.p11(idx);
+				break;
+
+			default:
+				break;
+		}
+	}
+
+	save(path) {
+		fs.writeFileSync('./results/' + path, JSON.stringify(this), 'utf8', (err) => {
+			if (err) {
+				console.error(err);
+				return;
+			};
+			console.log("File has been created");
+		});
+	}
+}
+
+const privMeths = {
+
+	new(path) {
 		// Read File 
 		let file = fs.readFileSync(__dirname + path, 'utf8')
 			.split('\n')
@@ -41,23 +134,24 @@ module.exports = class s2p {
 			x.forEach((e, i) => {
 				e = e.toUpperCase().split('E').filter(Boolean);
 				if (e.length >= 2)
-					x[i] = parseFloat(e[0]) * Math.pow(10, parseFloat(e[1]));
+					x[i] = parseFloat(e[0] * Math.pow(10, parseFloat(e[1])));
 				else
 					x[i] = parseFloat(e[0]);
 			});
 
-			this.freq.push(x[0]);
+			this.freq.push(Math.round(x[0], 3));
 
 			//Handle dB/Ang
-			if (this._format == 'DB') {
+
+			if (this.format == 'DB') {
 				x.forEach((e, i) => {
 					if ((i % 2) == 0) {
-						x[i] = Math.pow(10, e / 20) * Math.cos(x[i + 1]);
-						x[i + 1] = Math.pow(10, e / 20) * Math.sin(x[i + 1]);
+						x[i] = Math.pow(10, e / 20) * Math.cos(x[i + 1] * Math.PI / 180);
+						x[i + 1] = Math.pow(10, e / 20) * Math.sin(x[i + 1] * Math.PI / 180);
 					}
 				});
 
-			} else if (this._format == 'MA') {
+			} else if (this.format == 'MA') {
 				x.forEach((e, i) => {
 					if ((i % 2) == 0) {
 						x[i] = e * Math.cos(x[i + 1]);
@@ -65,6 +159,7 @@ module.exports = class s2p {
 					}
 				});
 			}
+
 			// Save Only R + jB
 			this.p11.push({ "x": x[1], "y": x[2] });
 			this.p21.push({ "x": x[3], "y": x[4] });
@@ -78,83 +173,7 @@ module.exports = class s2p {
 			delete this.p12;
 			delete this.p22;
 		}
-	}
-
-	// Handles Return Loss Request
-	ReturnLoss(p) {
-		let aux = [];
-		switch (p) {
-			case 11:
-				aux = privMehts.returnloss.call(this.p11);
-				break;
-
-			case 21:
-				aux = privMehts.returnloss.call(this.p21);
-				break;
-
-			default:
-				aux = [];
-				console.log('Stupid Attempt');
-
-		}
-
-		return aux;
-	}
-
-	// Handles VSWR request
-	VSWR(p) {
-		let aux = [];
-		switch (p) {
-			case 11:
-				aux = privMeths.vswr.call(this.p11);
-				break;
-
-			case 21:
-				aux = privMeths.vswr.call(this.p21);
-				break;
-
-			default:
-				aux = [];
-				console.log('Stupid Attempt');
-
-		}
-
-		return aux;
-	}
-
-	// Handles Absolute Value request
-	ABS(p) {
-		let aux = [];
-		switch (p) {
-			case 11:
-				aux = privMeths.abs.call(this.p11);
-				break;
-
-			case 21:
-				aux = privMeths.abs.call(this.p21);
-				break;
-
-			default:
-				aux = [];
-				console.log('Stupid Attempt');
-
-		}
-
-		return aux;
-	}
-
-	save(path) {
-		fs.writeFileSync('./results/' + path, JSON.stringify(this), 'utf8', (err) => {
-			if (err) {
-				console.error(err);
-				return;
-			};
-			console.log("File has been created");
-		});
-	}
-}
-
-const privMeths = {
+	},
 
 	// Find if S12 and S22 are present
 	findEmpty() {
@@ -172,24 +191,22 @@ const privMeths = {
 		return a > 0;
 	},
 
-
 	// Calculate Return Loss for Sxx
 	returnloss(p) {
 		let aux = []
 		p.forEach((point) => {
-			let a = math.abs(math.complex(point.x, point.y));
-			aux.push(20 * Math.log10(math.abs(a)));
+			let a = math.complex(point.x, point.y);
+			aux.push(Number((20 * Math.log10(math.abs(a)))).toFixed(3));
 		});
 		return aux;
 	},
 
-
 	// Calculate VSWR For given Sxx
 	vswr(p) {
 		let aux = []
-		p.forEach((point) => {
-			let a = math.abs(math.complex(point.x, point.y));
-			aux.push((1 + math.abs(a)) / (1 - math.abs(a)));
+		p.forEach((e) => {
+			let a = math.abs(math.complex(e.x, e.y));
+			aux.push(Number((1 + a) / (1 - a)).toFixed(3));
 		});
 		return aux;
 	},
@@ -202,6 +219,22 @@ const privMeths = {
 			aux.push(a);
 		});
 		return aux;
-	}
+	},
+
+	// Returns closest value 
+	closestFreq(p) {
+		let clst = Number.MAX_SAFE_INTEGER;
+		let idx = 0;
+
+		this.freq.forEach((e, i) => {
+			let dist = Math.abs(clst - e);
+			if (dist < clst) {
+				idx = i;
+				clst = dist;
+			}
+
+		})
+		return idx;
+	},
 
 }
