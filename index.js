@@ -6,10 +6,12 @@ module.exports = class s2p {
 
 	constructor(p) {
 		privMeths.new.call(this, p);
+		return this;
 	}
 
 	// Hadnles 	
 	Measure(p) {
+		let aux = [];
 		switch (p) {
 			case 11:
 				aux = this.p11;
@@ -19,7 +21,6 @@ module.exports = class s2p {
 				break;
 
 			default:
-				aux = [];
 				break;
 		}
 		return aux;
@@ -121,7 +122,7 @@ const privMeths = {
 		this.p12 = new Array();
 		this.p22 = new Array();
 
-		// Read Measurements                   
+		// Read Measurements  //              
 
 		// First line holds # units
 		file.splice(0, 1);
@@ -134,31 +135,33 @@ const privMeths = {
 			x.forEach((e, i) => {
 				e = e.toUpperCase().split('E').filter(Boolean);
 				if (e.length >= 2)
-					x[i] = parseFloat(e[0] * Math.pow(10, parseFloat(e[1])));
+					x[i] = math.round(parseFloat(e[0] * Math.pow(10, parseFloat(e[1]))), 3);
 				else
-					x[i] = parseFloat(e[0]);
+					x[i] = math.round(parseFloat(e[0]), 3);
 			});
 
-			this.freq.push(Math.round(x[0], 3));
+			this.freq.push(Math.round(x[0]));
 
 			//Handle dB/Ang
 
 			if (this.format == 'DB') {
 				x.forEach((e, i) => {
-					if ((i % 2) == 0) {
-						x[i] = Math.pow(10, e / 20) * Math.cos(x[i + 1] * Math.PI / 180);
-						x[i + 1] = Math.pow(10, e / 20) * Math.sin(x[i + 1] * Math.PI / 180);
+					if (((i - 1) % 2) == 0) {
+						x[i] = math.round(math.pow(10, e / 20) * math.cos(x[i + 1]), 3);
+						x[i + 1] = math.round(math.pow(10, e / 20) * math.sin(x[i + 1]), 3);
 					}
 				});
 
 			} else if (this.format == 'MA') {
 				x.forEach((e, i) => {
-					if ((i % 2) == 0) {
-						x[i] = e * Math.cos(x[i + 1]);
-						x[i + 1] = e * Math.sin(x[i + 1]);
+					if (((i - 1) % 2) == 0) {
+						x[i] = math.round(e * math.cos(x[i + 1]), 3);
+						x[i + 1] = math.round(e * math.sin(x[i + 1]), 3);
 					}
 				});
 			}
+
+
 
 			// Save Only R + jB
 			this.p11.push({ "x": x[1], "y": x[2] });
