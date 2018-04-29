@@ -9,52 +9,163 @@ module.exports = class s2p {
 		return this;
 	}
 
-	// Hadnles 	
-	Measure(p) {
+	// Hadnles a+jb requests
+	ReIm(p) {
 		let aux = [];
-		switch (p) {
-			case 11:
-				aux = this.p11;
-				break;
-			case 21:
-				aux = this.p21;
-				break;
+		if (this.params == 4) {
+			switch (p) {
+				case 11:
+					aux = this.p11; break;
 
-			default:
-				break;
+				case 21:
+					aux = this.p21; break;
+
+				case 12:
+					aux = this.p12; break;
+
+				case 22:
+					aux = this.p22; break;
+				default:
+					break;
+			}
+		} else {
+			switch (p) {
+				case 11:
+					aux = this.p11; break;
+
+				case 21:
+					aux = this.p21; break;
+
+				default:
+					break;
+			}
 		}
 		return aux;
 	}
 
-	// Handles Return Loss Request
-	ReturnLoss() {
-		return privMeths.returnloss.call(this, this.p11);;
+	// Handles -20Log10(|Sxx|)
+	LogMag(p) {
+		let aux = [];
+		if (this.params == 4) {
+			switch (p) {
+				case 11:
+					aux = privMeths.logmag.call(this, this.p11); break;
+
+				case 21:
+					aux = privMeths.logmag.call(this, this.p21); break;
+
+				case 12:
+					aux = privMeths.logmag.call(this, this.p12); break;
+
+				case 22:
+					aux = privMeths.logmag.call(this, this.p22); break;
+				default:
+					break;
+			}
+		} else {
+			switch (p) {
+				case 11:
+					aux = privMeths.logmag.call(this, this.p11); break;
+
+				case 21:
+					aux = privMeths.logmag.call(this, this.p21); break;
+
+				default:
+					break;
+			}
+		}
+		return aux;
 	}
+
+	// Handles |Sxx|
+	LinMag(p) {
+		let aux = [];
+		if (this.params == 4) {
+			switch (p) {
+				case 11:
+					aux = privMeths.linmag.call(this, this.p11); break;
+
+				case 21:
+					aux = privMeths.linmag.call(this, this.p21); break;
+
+				case 12:
+					aux = privMeths.linmag.call(this, this.p12); break;
+
+				case 22:
+					aux = privMeths.linmag.call(this, this.p22); break;
+				default:
+					break;
+			}
+		} else {
+			switch (p) {
+				case 11:
+					aux = privMeths.linmag.call(this, this.p11); break;
+
+				case 21:
+					aux = privMeths.linmag.call(this, this.p21); break;
+
+				default:
+					break;
+			}
+		}
+		return aux;
+
+	}
+
+
+	// Handles a<bº
+	LinAngle(p) {
+		let aux = [];
+		if (this.params == 4) {
+			switch (p) {
+				case 11:
+					aux = privMeths.linang.call(this, this.p11); break;
+
+				case 21:
+					aux = privMeths.linang.call(this, this.p21); break;
+
+				case 12:
+					aux = privMeths.linang.call(this, this.p12); break;
+
+				case 22:
+					aux = privMeths.linang.call(this, this.p22); break;
+				default:
+					break;
+			}
+		} else {
+			switch (p) {
+				case 11:
+					aux = privMeths.linang.call(this, this.p11); break;
+
+				case 21:
+					aux = privMeths.linang.call(this, this.p21); break;
+
+				default:
+					break;
+			}
+		}
+		return aux;
+	}
+
+
+
+
+
+
+
+
+
+
+
 
 	// Handles VSWR request
 	VSWR() {
 		return privMeths.vswr.call(this, this.p11);
 	}
 
-	// Handles Absolute Value request
-	ABS(p) {
-		let aux = [];
-		switch (p) {
-			case 11:
-				aux = privMeths.abs.call(this, this.p11);
-				break;
+	// Handles Zin Request
+	Zin() {
 
-			case 21:
-				aux = privMeths.abs.call(this, this.p21);
-				break;
-
-			default:
-				aux = [];
-				console.log('Stupid Attempt');
-
-		}
-
-		return aux;
 	}
 
 	// Returns Wanted Parameter for Given Frequency(Hz)
@@ -193,11 +304,11 @@ const privMeths = {
 	},
 
 	// Calculate Return Loss for Sxx
-	returnloss(p) {
+	logmag(p) {
 		let aux = []
 		p.forEach((point) => {
 			let a = math.complex(point.x, point.y);
-			aux.push(Number((20 * Math.log10(math.abs(a)))).toFixed(3));
+			aux.push(math.round(- 20 * math.log10(math.abs(a)), 3));
 		});
 		return aux;
 	},
@@ -207,20 +318,51 @@ const privMeths = {
 		let aux = []
 		p.forEach((e) => {
 			let a = math.abs(math.complex(e.x, e.y));
-			aux.push(Number((1 + a) / (1 - a)).toFixed(3));
+			aux.push(math.round((1 + a) / (1 - a), 3));
 		});
 		return aux;
 	},
 
 	// Calculate |Sxx|
-	abs(p) {
+	linmag(p) {
 		let aux = []
 		p.forEach((point) => {
-			let a = math.abs(math.complex(point.x, point.y));
-			aux.push(a);
+			let a = math.abs(math.complex(math.round(point.x, 3), math.round(point.y, 3)));
+			aux.push(math.round(a, 3));
 		});
 		return aux;
 	},
+
+	// Calculate |Sxx|<Sxxº
+	linang(p) {
+		let aux = []
+		p.forEach((point) => {
+			let a = math.complex(point.x, point.y);
+
+			math.round(a, 3);
+			a = a.toPolar();
+			aux.push({
+				"r": math.round(a.r, 3),
+				"phi": math.round(a.phi, 3)
+			});
+		});
+		return aux;
+	},
+
+	// Calculate Zin
+	/*
+	zin(a) {
+		aux = [];
+		this.p11.forEach((point) => {
+			let p = math.complex(point.x, point.y);
+			let n = math.multiply(p, math.conj(p));
+			let d = math.pow(p.re(), 2) + math.pow(p.im, 2);
+			aux.push(math.multiply(a, math.divide(n, d));
+		});
+		
+		return aux;
+	},
+	*/
 
 	// Returns closest value 
 	closestFreq(p) {
