@@ -135,7 +135,7 @@ const privMeths = {
 			x.forEach((e, i) => {
 				e = e.toUpperCase().split('E').filter(Boolean);
 				if (e.length >= 2)
-					x[i] = math.round(parseFloat(e[0] * Math.pow(10, parseFloat(e[1]))), 3);
+					x[i] = math.round(parseFloat(e[0] * Math.pow(10, parseFloat(e[1]) + this.fscale)), 3);
 				else
 					x[i] = math.round(parseFloat(e[0]), 3);
 			});
@@ -160,8 +160,6 @@ const privMeths = {
 					}
 				});
 			}
-
-
 
 			// Save Only R + jB
 			this.p11.push({ "x": x[1], "y": x[2] });
