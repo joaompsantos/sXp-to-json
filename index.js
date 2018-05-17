@@ -1,6 +1,8 @@
 var fs = require('fs');
 var math = require('mathjs');
 
+import * as fsb from 'fs-web';
+
 
 module.exports = class s2p {
 
@@ -197,7 +199,7 @@ module.exports = class s2p {
 	}
 
 	save(path) {
-		fs.writeFileSync('./results/' + path, JSON.stringify(this), 'utf8', (err) => {
+		fsb.writeFile('./results/' + path, JSON.stringify(this), 'utf8', (err) => {
 			if (err) {
 				console.error(err);
 				return;
@@ -211,7 +213,7 @@ const privMeths = {
 
 	new(path) {
 		// Read File 
-		let file = fs.readFileSync(__dirname + path, 'utf8')
+		let file = fsb.readFile(__dirname + path, 'utf8')
 			.split('\n')
 			.filter((x) => {
 				return x.charAt(0) != '!'
@@ -246,9 +248,9 @@ const privMeths = {
 			x.forEach((e, i) => {
 				e = e.toUpperCase().split('E').filter(Boolean);
 				if (e.length >= 2)
-					x[i] = math.round(parseFloat(e[0] * Math.pow(10, parseFloat(e[1]) + this.fscale)), 3);
+					x[i] = math.round(parseFloat(e[0] * Math.pow(10, parseFloat(e[1]) + this.fscale)), 4);
 				else
-					x[i] = math.round(parseFloat(e[0]), 3);
+					x[i] = math.round(parseFloat(e[0]), 4);
 			});
 
 			this.freq.push(Math.round(x[0]));
@@ -258,16 +260,16 @@ const privMeths = {
 			if (this.format == 'DB') {
 				x.forEach((e, i) => {
 					if (((i - 1) % 2) == 0) {
-						x[i] = math.round(math.pow(10, e / 20) * math.cos(x[i + 1]), 3);
-						x[i + 1] = math.round(math.pow(10, e / 20) * math.sin(x[i + 1]), 3);
+						x[i] = math.round(math.pow(10, e / 20) * math.cos(x[i + 1]), 4);
+						x[i + 1] = math.round(math.pow(10, e / 20) * math.sin(x[i + 1]), 4);
 					}
 				});
 
 			} else if (this.format == 'MA') {
 				x.forEach((e, i) => {
 					if (((i - 1) % 2) == 0) {
-						x[i] = math.round(e * math.cos(x[i + 1]), 3);
-						x[i + 1] = math.round(e * math.sin(x[i + 1]), 3);
+						x[i] = math.round(e * math.cos(x[i + 1]), 4);
+						x[i + 1] = math.round(e * math.sin(x[i + 1]), 4);
 					}
 				});
 			}

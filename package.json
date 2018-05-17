@@ -4,11 +4,11 @@
   "description": "Touchstone file to javascript object conversion library",
   "main": "index.js",
   "scripts": {
-    "test": "node index.js"
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dvcorreia/sXp-to-json.git"
+    "url": "git+https://github.com/joaompsantos/sXp-to-json"
   },
   "keywords": [
     "touchstone",
@@ -25,10 +25,11 @@
   "author": "Diogo Correia (@dvcorreia), João Santos (@joaompsantos)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dvcorreia/sXp-to-json/issues"
+    "url": "https://github.com/joaompsantos/sXp-to-json"
   },
-  "homepage": "https://github.com/dvcorreia/sXp-to-json#readme",
+  "homepage": "https://github.com/joaompsantos/sXp-to-json#readme",
   "dependencies": {
+    "fs-web": "^1.0.1",
     "mathjs": "^4.0.1"
   }
 }
