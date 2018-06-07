@@ -1,13 +1,14 @@
 var fs = require('fs');
 var math = require('mathjs');
 
-import * as fsb from 'fs-web';
-
 
 module.exports = class s2p {
 
-	constructor(p) {
-		privMeths.new.call(this, p);
+	constructor(p, d) {
+		//
+		// p -> path
+		// d ->  data from file
+		privMeths.new.call(this, p, d);
 		return this;
 	}
 
@@ -39,6 +40,7 @@ module.exports = class s2p {
 					aux = this.p21; break;
 
 				default:
+					aux = 'Error';
 					break;
 			}
 		}
@@ -173,7 +175,7 @@ module.exports = class s2p {
 	// Returns Wanted Parameter for Given Frequency(Hz)
 	searchFreq(a, b) {
 		let idx = privMeths.closestFreq.call(this, a);
-
+		console.log(idx);
 		switch (b) {
 			// S11
 			case 11:
@@ -181,12 +183,12 @@ module.exports = class s2p {
 				break;
 			// S21
 			case 21:
-				return this.p21(idx);
+				return this.p21[idx];
 				break;
 
 			// Freq	
 			case 'RL':
-				return privMeths.returnloss.call(this, this.p11)[idx];
+				return privMeths.logmag.call(this, this.p11)[idx];
 				break;
 
 			case 'VSWR':
@@ -199,7 +201,7 @@ module.exports = class s2p {
 	}
 
 	save(path) {
-		fsb.writeFile('./results/' + path, JSON.stringify(this), 'utf8', (err) => {
+		fs.writeFileSync('./results/' + path, JSON.stringify(this), 'utf8', (err) => {
 			if (err) {
 				console.error(err);
 				return;
@@ -211,14 +213,20 @@ module.exports = class s2p {
 
 const privMeths = {
 
-	new(path) {
-		// Read File 
-		let file = fsb.readFile(__dirname + path, 'utf8')
-			.split('\n')
-			.filter((x) => {
-				return x.charAt(0) != '!'
-			});
+	new(path, data) {
+		// Read File
 
+		let file;
+
+		if (data == null) {
+			file = fs.readFileSync(__dirname + path, 'utf8')
+				.split('\n')
+				.filter((x) => {
+					return x.charAt(0) != '!'
+				});
+		} else if (data) {
+			file = data;
+		}
 		// Frequency scale units
 		let fscale = ['HZ', 'KHZ', 'MHZ', 'GHZ', 'THZ'];
 
@@ -237,8 +245,6 @@ const privMeths = {
 
 		// Read Measurements  //              
 
-		// First line holds # units
-		file.splice(0, 1);
 		// Last line is empty
 		file.splice(file.length - 1, 1);
 
@@ -248,28 +254,27 @@ const privMeths = {
 			x.forEach((e, i) => {
 				e = e.toUpperCase().split('E').filter(Boolean);
 				if (e.length >= 2)
-					x[i] = math.round(parseFloat(e[0] * Math.pow(10, parseFloat(e[1]) + this.fscale)), 4);
+					x[i] = math.round(parseFloat(e[0] * Math.pow(10, parseFloat(e[1]))), 3);
 				else
-					x[i] = math.round(parseFloat(e[0]), 4);
+					x[i] = math.round(parseFloat(e[0]), 3);
 			});
 
 			this.freq.push(Math.round(x[0]));
 
 			//Handle dB/Ang
-
 			if (this.format == 'DB') {
 				x.forEach((e, i) => {
 					if (((i - 1) % 2) == 0) {
-						x[i] = math.round(math.pow(10, e / 20) * math.cos(x[i + 1]), 4);
-						x[i + 1] = math.round(math.pow(10, e / 20) * math.sin(x[i + 1]), 4);
+						x[i] = math.round(Math.pow(10, e / 20) * Math.cos(x[i + 1] * Math.PI / 180), 3);
+						x[i + 1] = math.round(Math.pow(10, e / 20) * Math.sin(x[i + 1] * Math.PI / 180), 3);
 					}
 				});
 
 			} else if (this.format == 'MA') {
 				x.forEach((e, i) => {
 					if (((i - 1) % 2) == 0) {
-						x[i] = math.round(e * math.cos(x[i + 1]), 4);
-						x[i + 1] = math.round(e * math.sin(x[i + 1]), 4);
+						x[i] = math.round(e * Math.cos(x[i + 1] * Math.PI / 180), 3);
+						x[i + 1] = math.round(e * Math.sin(x[i + 1] * Math.PI / 180), 3);
 					}
 				});
 			}
@@ -281,6 +286,12 @@ const privMeths = {
 			this.p22.push({ "x": x[7], "y": x[8] });
 		});
 
+
+		this.freq.splice(0, 1);
+		this.p11.splice(0, 1);
+		this.p21.splice(0, 1);
+		this.p12.splice(0, 1);
+		this.p22.splice(0, 1);
 		if (privMeths.findEmpty.call(this)) {
 			this.params = 4;
 		} else {
@@ -295,13 +306,6 @@ const privMeths = {
 		this.p12.forEach((point) => {
 			a += point.x + point.y;
 		});
-		/* Only need to check if one is present
-		// Beacuse they come together
-		let b = 0;
-		this.p22.forEach((point) => {
-			b += math.abs(math.complex(point.x, point.y));
-		});
-		*/
 		return a > 0;
 	},
 
@@ -310,7 +314,7 @@ const privMeths = {
 		let aux = []
 		p.forEach((point) => {
 			let a = math.complex(point.x, point.y);
-			aux.push(math.round(- 20 * math.log10(math.abs(a)), 3));
+			aux.push(math.round(20 * math.log10(math.abs(a)), 3));
 		});
 		return aux;
 	},
@@ -351,35 +355,28 @@ const privMeths = {
 		return aux;
 	},
 
-	// Calculate Zin
-	/*
-	zin(a) {
-		aux = [];
-		this.p11.forEach((point) => {
-			let p = math.complex(point.x, point.y);
-			let n = math.multiply(p, math.conj(p));
-			let d = math.pow(p.re(), 2) + math.pow(p.im, 2);
-			aux.push(math.multiply(a, math.divide(n, d));
-		});
-		
-		return aux;
-	},
-	*/
-
 	// Returns closest value 
 	closestFreq(p) {
 		let clst = Number.MAX_SAFE_INTEGER;
 		let idx = 0;
 
 		this.freq.forEach((e, i) => {
-			let dist = Math.abs(clst - e);
+			let dist = Math.abs(p - e);
 			if (dist < clst) {
 				idx = i;
 				clst = dist;
 			}
-
 		})
 		return idx;
 	},
+
+
+	// Split into 200 points
+
+	easyData() {
+
+
+
+	}
 
 }

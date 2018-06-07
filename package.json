@@ -30,6 +30,6 @@
   "homepage": "https://github.com/joaompsantos/sXp-to-json#readme",
   "dependencies": {
     "fs-web": "^1.0.1",
-    "mathjs": "^4.0.1"
+    "mathjs": "^4.4.2"
   }
 }

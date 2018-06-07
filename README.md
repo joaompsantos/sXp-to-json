@@ -140,7 +140,7 @@ Meanings:
 }
 ```
 
-\## TODO:
+## TODO:
 
 - [ ] Add Support for Z,Y, T parameters
 
@@ -153,3 +153,6 @@ Meanings:
 - [x] Round values with n decimal places
 
 - [ ] Search for frequency ou parameter 
+
+## Changes
+- New var in constructor permits lib to work with vector data from readed file
