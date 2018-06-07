@@ -1,4 +1,4 @@
-var fs = require('fs');
+//var fs = require('fs');
 var math = require('mathjs');
 
 
@@ -201,13 +201,13 @@ module.exports = class s2p {
 	}
 
 	save(path) {
-		fs.writeFileSync('./results/' + path, JSON.stringify(this), 'utf8', (err) => {
+		/*fs.writeFileSync('./results/' + path, JSON.stringify(this), 'utf8', (err) => {
 			if (err) {
 				console.error(err);
 				return;
 			};
 			console.log("File has been created");
-		});
+		});*/
 	}
 }
 
@@ -217,14 +217,16 @@ const privMeths = {
 		// Read File
 
 		let file;
-
+		/*
 		if (data == null) {
 			file = fs.readFileSync(__dirname + path, 'utf8')
 				.split('\n')
 				.filter((x) => {
 					return x.charAt(0) != '!'
 				});
-		} else if (data) {
+		} else */
+
+		if (data) {
 			file = data;
 		}
 		// Frequency scale units
@@ -374,8 +376,6 @@ const privMeths = {
 	// Split into 200 points
 
 	easyData() {
-
-
 
 	}
 
