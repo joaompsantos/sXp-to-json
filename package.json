@@ -1,6 +1,6 @@
 {
   "name": "sxp-to-json",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Touchstone file to javascript object conversion library",
   "main": "index.js",
   "scripts": {
