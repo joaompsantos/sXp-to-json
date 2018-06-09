@@ -28,11 +28,15 @@ After object initilization, data is saved on object according to the configurati
 
 - constructor(path) => Initializes new instance given file path, _\*\*path\*\*_.
 
-- ReturnLoss(p) => Calculate Return Loss for parameter, _\*\*p\*\*_, selected.
+- ReIm(p) => Calculates A+jB for parameter, _\*\*p\*\*_, selected.
+
+- LogMag(p) => Calculates 20Log10(|p|) for parameter, _\*\*p\*\*_, selected.
+
+- LinMag(p) => Calculate |p| for parameter, _\*\*p\*\*_, selected.
+
+- LinAng(p) => Calculate |p| and Angle º for parameter, _\*\*p\*\*_, selected.
 
 - VSWR(p) => Calculate VSWR for parameter, _\*\*p\*\*_, selected.
-
-- ABS(p) => Calculate Absolute Value for parameter, _\*\*p\*\*_, selected.
 
 - save(name) => Save object to \_json\_ file named _\*name\*_.
 
@@ -42,7 +46,14 @@ After object initilization, data is saved on object according to the configurati
 
 ```javascript
 var s2p = require('./index.js')
-let sxp = new s2p('file.s2p')
+let sxp = new s2p('file.s2p', null)
+
+// Alternatively, d = array of strings readed from file
+
+var s2p = require('./index.js')
+let sxp = new s2p(null, file)
+
+
 ```
 
 ### Get VSWR.
@@ -52,18 +63,11 @@ let vswr11 = sxp.VSWR(11);
 let vswr21 = sxp.VSWR(21);
 ```
 
-### Get Return Loss.
+### Get LogMagnitude.
 
 ```javascript
-let rl11 = sxp.ReturnLoss(11);
-let rl21 = sxp.ReturnLoss(21);
-```
-
-### Get Absolute Value.
-
-```javascript
-let abs11 = sxp.ABS(11);
-let abs21 = sxp.ABS(21);
+let rl11 = sxp.LogMag(11);
+let rl21 = sxp.LogMag(21);
 ```
 
 ### Save object to JSON file.
@@ -80,7 +84,7 @@ Meanings:
 
 - fscale : Frequency Scale, Hz -> 0, KHz -> 3, ...
 
-- params : Scatering, S, Impedance, Z,Admitance, Y,...
+- params : 2=>One-Path or 4=>Two-Path s2p file, 
 
 - format : Real and Imaginarie, RI, Magnitude and Angle, MA, Decibel and Angle, DB
 
@@ -152,7 +156,8 @@ Meanings:
 
 - [x] Round values with n decimal places
 
-- [ ] Search for frequency ou parameter 
+- [x] Search for frequency ou parameter 
 
 ## Changes
-- New var in constructor permits lib to work with vector data from readed file
+- Can now choose between read file or accept already readed file as array data, \n separeted
+- 8/6/18 - Some Improvements on Code
