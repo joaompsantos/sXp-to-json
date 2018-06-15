@@ -4,7 +4,8 @@
   "description": "Touchstone file to javascript object conversion library",
   "main": "index.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "node test.js",
+    "build": "./node_modules/.bin/babel src/index.js --out-dir lib"
   },
   "repository": {
     "type": "git",
@@ -31,5 +32,10 @@
   "dependencies": {
     "fs-web": "^1.0.1",
     "mathjs": "^4.4.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-minify": "^0.4.3",
+    "babel-preset-env": "^1.7.0"
   }
 }
