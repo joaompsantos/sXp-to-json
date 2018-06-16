@@ -8,3 +8,4 @@ console.log(sxp.searchFreq(5, 11));
 // Output format
 console.log(sxp.ReIm(11));
 console.log(sxp.LogMag(11));
+console.log(sxp.ZIN());

@@ -154,8 +154,8 @@ module.exports = class s2p {
 	}
 
 	// Zin
-	Zin() {
-		return privMeths.vswr.call(this, this.p11);
+	ZIN() {
+		return privMeths.zin.call(this, this.p11);
 	}
 
 	// Returns Wanted Parameter for Given Frequency(Hz)
@@ -343,6 +343,17 @@ const privMeths = {
 				"phi": math.round(a.phi, 3)
 			});
 		});
+		return aux;
+	},
+
+	// Calculate Zin
+	zin(p) {
+		let aux = []
+		let Z = this.lo
+		p.forEach((point) => {
+			let a = math.abs(math.complex(point.x, point.y));
+			aux.push(this.load * math.round((1 + a) / (1 - a), 3));
+		})
 		return aux;
 	},
 
