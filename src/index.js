@@ -351,8 +351,10 @@ const privMeths = {
 		let aux = []
 		let Z = this.lo
 		p.forEach((point) => {
-			let a = math.abs(math.complex(point.x, point.y));
-			aux.push(this.load * math.round((1 + a) / (1 - a), 3));
+			let a = math.complex(point.x, point.y);
+			let b = math.add(a, 1);
+			let c = math.subtract(a, 1);
+			aux.push(math.round(math.divide(b, c), 3));
 		})
 		return aux;
 	},
