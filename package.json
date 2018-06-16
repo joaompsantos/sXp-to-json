@@ -1,41 +1,41 @@
 {
-  "name": "sxp-to-json",
-  "version": "1.0.0",
-  "description": "Touchstone file to javascript object conversion library",
-  "main": "index.js",
-  "scripts": {
-    "test": "node test.js",
-    "build": "./node_modules/.bin/babel src/index.js --out-dir lib"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/joaompsantos/sXp-to-json"
-  },
-  "keywords": [
-    "touchstone",
-    "touchstone-file",
-    "s2p",
-    "s4p",
-    "smith",
-    "chart",
-    "sxp",
-    "snp",
-    "javascript",
-    "nodejs"
-  ],
-  "author": "Diogo Correia (@dvcorreia), João Santos (@joaompsantos)",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/joaompsantos/sXp-to-json"
-  },
-  "homepage": "https://github.com/joaompsantos/sXp-to-json#readme",
-  "dependencies": {
-    "fs-web": "^1.0.1",
-    "mathjs": "^4.4.2"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-minify": "^0.4.3",
-    "babel-preset-env": "^1.7.0"
-  }
+	"name": "sxp-to-json",
+	"version": "1.0.0",
+	"description": "Touchstone file to javascript object conversion library",
+	"main": "index.js",
+	"scripts": {
+		"test": "node test.js",
+		"build": "./node_modules/.bin/babel src --out-dir ."
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/joaompsantos/sXp-to-json"
+	},
+	"keywords": [
+		"touchstone",
+		"touchstone-file",
+		"s2p",
+		"s4p",
+		"smith",
+		"chart",
+		"sxp",
+		"snp",
+		"javascript",
+		"nodejs"
+	],
+	"author": "Diogo Correia (@dvcorreia), João Santos (@joaompsantos)",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/joaompsantos/sXp-to-json"
+	},
+	"homepage": "https://github.com/joaompsantos/sXp-to-json#readme",
+	"dependencies": {
+		"fs-web": "^1.0.1",
+		"mathjs": "^4.4.2"
+	},
+	"devDependencies": {
+		"babel-cli": "^6.26.0",
+		"babel-minify": "^0.4.3",
+		"babel-preset-env": "^1.7.0"
+	}
 }
